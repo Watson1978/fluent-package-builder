@@ -40,7 +40,7 @@ if ENV["INSTALL_GEM_FROM_LOCAL_REPO"]
 else
   # Lock to specific revision
   git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-  gem "fluentd", github: "fluent/fluentd", ref: FLUENTD_REVISION
+  gem "fluentd", github: "Watson1978/fluentd", ref: FLUENTD_REVISION
   gem "win32-service", github: "fluent-plugins-nursery/win32-service", branch: "fluent-package", platforms: [:mingw, :x64_mingw]
 end
 
