@@ -177,6 +177,7 @@ class DownloadTask
   attr_reader :file_jemalloc_source
   attr_reader :file_ruby_source, :file_ruby_installer_x64
   attr_reader :file_fluentd_archive
+  attr_reader :file_serverengine_archive
   attr_reader :file_win32_service_archive
   attr_reader :files_ruby_gems
   attr_reader :file_openssl_source
@@ -192,6 +193,7 @@ class DownloadTask
       @file_ruby_source,
       @file_ruby_installer_x64,
       @file_fluentd_archive,
+      @file_serverengine_archive,
       *@files_ruby_gems
     ]
   end
@@ -200,6 +202,7 @@ class DownloadTask
     define_jemalloc_file
     define_ruby_files
     define_fluentd_archive
+    define_serverengine_archive
     define_win32_service_archive if windows?
     define_gem_files
     define_openssl_file
@@ -213,6 +216,9 @@ class DownloadTask
 
       desc "Clone fluentd repository and create a tarball"
       task :fluentd => [@file_fluentd_archive]
+
+      desc "Clone serverengine repository and create a tarball"
+      task :serverengine => [@file_serverengine_archive]
 
       desc "Clone win32-service repository and create a tarball"
       task :win32_service => [@file_win32_service_archive]
@@ -314,11 +320,28 @@ class DownloadTask
         dirname = "fluentd-#{FLUENTD_REVISION}"
         rm_rf("fluentd") if File.exist?("fluentd")
         rm_rf(dirname) if File.exist?(dirname)
-        sh("git", "clone", "https://github.com/fluent/fluentd.git")
+        sh("git", "clone", "https://github.com/Watson1978/fluentd.git")
         cd("fluentd") do
-          sh("git", "checkout", FLUENTD_REVISION)
+          sh("git", "checkout", "-b", "downtime", "origin/downtime")
         end
         mv("fluentd", dirname)
+        sh(*tar_command, "cvfz", "#{dirname}.tar.gz", dirname)
+      end
+      puts "::endgroup::" if ENV["CI"]
+    end
+  end
+
+  def define_serverengine_archive
+    @file_serverengine_archive = File.join(DOWNLOADS_DIR, "serverengine.tar.gz")
+    file @file_serverengine_archive do
+      ensure_directory(DOWNLOADS_DIR) do
+        puts "::group::Create #{@file_serverengine_archive}" if ENV["CI"]
+        dirname = "serverengine"
+        rm_rf(dirname) if File.exist?(dirname)
+        sh("git", "clone", "https://github.com/Watson1978/serverengine.git")
+        cd("serverengine") do
+          sh("git", "checkout", "-b", "downtime", "origin/downtime")
+        end
         sh(*tar_command, "cvfz", "#{dirname}.tar.gz", dirname)
       end
       puts "::endgroup::" if ENV["CI"]
@@ -429,7 +452,7 @@ class BuildTask
       end
 
       desc "Install ruby gems"
-      task :ruby_gems => windows? ? [:"download:ruby_gems", :fluentd, :win32_service] : [:"download:ruby_gems", :fluentd] do
+      task :ruby_gems => windows? ? [:"download:ruby_gems", :fluentd, :serverengine, :win32_service] : [:"download:ruby_gems", :fluentd, :serverengine] do
         puts "::group::Install ruby gems" if ENV["CI"]
         gem_install("bundler", BUNDLER_VERSION)
 
@@ -462,6 +485,30 @@ class BuildTask
             install_gemfiles
           end
         end
+        puts "::endgroup::" if ENV["CI"]
+      end
+
+      desc "Install serverengine"
+      task :serverengine => [:"download:serverengine"] do
+        puts "::group::Install serverengine" if ENV["CI"]
+        gem_install("bundler", BUNDLER_VERSION)
+
+        gem_home = ENV["GEM_HOME"]
+        ENV["GEM_HOME"] = gem_staging_dir
+        ENV["INSTALL_GEM_FROM_LOCAL_REPO"] = "yes"
+
+        cd(DOWNLOADS_DIR) do
+          tar_options = ["--no-same-owner", "--force-local"]
+          archive_path = @download_task.file_serverengine_archive
+          sh(*tar_command, "xvf", archive_path, *tar_options) unless File.exist?("serverengine")
+          cd("serverengine") do
+            sh(bundle_command, "_#{BUNDLER_VERSION}_", "install", "-j#{Etc.nprocessors}")
+            sh("rake", "build")
+            setup_local_gem_repo
+          end
+        end
+
+        ENV["GEM_HOME"] = gem_home
         puts "::endgroup::" if ENV["CI"]
       end
 

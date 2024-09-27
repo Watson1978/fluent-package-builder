@@ -13,7 +13,7 @@ gem "cool.io", "1.8.1",  platforms: no_fat_gem
 gem "sigdump", "0.2.5"
 gem "http_parser.rb", "0.8.0"
 gem "yajl-ruby", "1.4.3"
-gem "serverengine", '2.3.2'
+# gem "serverengine", '2.3.2'
 gem "msgpack", "1.7.2"
 gem "oj", "3.16.4"
 gem "tzinfo", "2.0.6"
@@ -29,6 +29,7 @@ if ENV["INSTALL_GEM_FROM_LOCAL_REPO"]
   # into managed Gemfile.lock
   source FLUENTD_LOCAL_GEM_REPO do
     gem "fluentd"
+    gem "serverengine", '2.3.2'
     # Bundle forked version of win32-service until
     # https://github.com/chef/win32-service/pull/85 is merged.
     # This workaround should be applied to fluent-package not to block starting
@@ -40,7 +41,8 @@ if ENV["INSTALL_GEM_FROM_LOCAL_REPO"]
 else
   # Lock to specific revision
   git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-  gem "fluentd", github: "fluent/fluentd", ref: FLUENTD_REVISION
+  gem "fluentd", git: "https://github.com/Watson1978/fluentd.git", branch: "downtime"
+  gem "serverengine", git: "https://github.com/Watson1978/serverengine.git", branch: "downtime"
   gem "win32-service", github: "fluent-plugins-nursery/win32-service", branch: "fluent-package", platforms: [:mingw, :x64_mingw]
 end
 
