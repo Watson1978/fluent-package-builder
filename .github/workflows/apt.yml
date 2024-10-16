@@ -132,22 +132,16 @@ jobs:
           - Ubuntu Noble amd64
         test-file:
           - "update-from-v4.sh"
-          - "update-to-next-version-with-backward-compat-for-v4.sh"
-          - "update-to-next-version.sh"
           - "downgrade-to-v4.sh"
           - "install-newly.sh local"
           - "install-newly.sh v5"
           - "install-newly.sh lts"
-          - "update-to-next-version.sh v5"
-          - "update-to-next-version.sh lts"
-          - "update-to-next-version-with-active-and-enabled.sh v5"
-          - "update-to-next-version-with-active-and-enabled.sh lts"
-          - "update-to-next-version-with-active-and-disabled.sh v5"
-          - "update-to-next-version-with-active-and-disabled.sh lts"
-          - "update-to-next-version-with-inactive-and-enabled.sh v5"
-          - "update-to-next-version-with-inactive-and-enabled.sh lts"
-          - "update-to-next-version-with-inactive-and-disabled.sh v5"
-          - "update-to-next-version-with-inactive-and-disabled.sh lts"
+          - "update-to-next-version.sh"
+          - "update-to-next-version-with-backward-compat-for-v4.sh"
+          - "update-to-next-version-with-active-and-enabled.sh"
+          - "update-to-next-version-with-active-and-disabled.sh"
+          - "update-to-next-version-with-inactive-and-enabled.sh"
+          - "update-to-next-version-with-inactive-and-disabled.sh"
         include:
           - label: Debian bullseye amd64
             rake-job: debian-bullseye
