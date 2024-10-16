@@ -27,9 +27,9 @@ main_pid=$(systemctl show --value --property=MainPID fluentd)
 # Install the dummy package
 sudo apt install -V -y ./next_version.deb
 
-# The service should restart automatically after update
+# The service should NOT restart automatically after update
 systemctl is-active fluentd
-test $main_pid -ne $(systemctl show --value --property=MainPID fluentd)
+test $main_pid -eq $(systemctl show --value --property=MainPID fluentd)
 
 # The service should take over the state
 (! systemctl is-enabled fluentd)
