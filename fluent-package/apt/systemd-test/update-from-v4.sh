@@ -32,7 +32,7 @@ sudo apt install -V -y \
     /host/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb
 
 # Test: service status
-systemctl status --no-pager fluentd
+(! systemctl status --no-pager fluentd)
 (! systemctl status --no-pager td-agent)
 
 # Test: restoring td-agent service alias
@@ -89,6 +89,8 @@ test $(find /tmp/ -name gem_local_list.output | xargs cat) = "fluent-plugin-conc
 (! sudo /usr/sbin/td-agent)
 (! sudo /usr/sbin/fluentd -v)
 sudo /usr/sbin/fluentd --dry-run
+
+sudo systemctl stop fluentd
 
 # Uninstall
 sudo apt remove -y fluent-package

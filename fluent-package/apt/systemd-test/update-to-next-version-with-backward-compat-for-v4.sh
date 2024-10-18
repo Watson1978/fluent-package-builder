@@ -17,6 +17,7 @@ sudo apt clean all
 sudo apt update
 sudo apt install -V -y td-agent=${td_agent_version}-1
 
+sudo systemctl enable --now td-agent
 systemctl status --no-pager td-agent
 
 # Generate garbage files
@@ -30,9 +31,8 @@ done
 # Install the current
 sudo apt install -V -y \
     /host/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb
-systemctl status --no-pager fluentd
+(! systemctl status --no-pager td-agent)
 
-sudo systemctl stop fluentd
 sudo systemctl unmask td-agent
 sudo systemctl enable --now fluentd
 
@@ -85,6 +85,8 @@ test -e /var/log/fluent/fluentd.log
 (! sudo /usr/sbin/td-agent)
 (! sudo /usr/sbin/fluentd -v)
 sudo /usr/sbin/fluentd --dry-run
+
+sudo systemctl stop fluentd
 
 # Uninstall
 sudo apt remove -y fluent-package
