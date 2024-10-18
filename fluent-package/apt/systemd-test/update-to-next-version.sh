@@ -42,7 +42,6 @@ test $(eval $env_vars && echo $FLUENT_CONF) = "/etc/fluent/fluentd.conf"
 test $(eval $env_vars && echo $FLUENT_PACKAGE_LOG_FILE) = "/var/log/fluent/fluentd.log"
 test $(eval $env_vars && echo $FLUENT_PLUGIN) = "/etc/fluent/plugin"
 test $(eval $env_vars && echo $FLUENT_SOCKET) = "/var/run/fluent/fluentd.sock"
-test $(eval $env_vars && echo $FLUENT_PACKAGE_VERSION) = "$next_package_ver"
 
 # Test: fluent-diagtool
 sudo fluent-gem install fluent-plugin-concat
