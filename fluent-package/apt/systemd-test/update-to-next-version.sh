@@ -57,7 +57,10 @@ test $(find /tmp/ -name gem_local_list.output | xargs cat) = "fluent-plugin-conc
 # Test: logs
 sleep 3
 test -e /var/log/fluent/fluentd.log
-(! grep -q -e '\[warn\]' -e '\[error\]' -e '\[fatal\]' /var/log/fluent/fluentd.log)
+
+# The warning might be displayed at the timing to terminate the thread.
+# So, it does not check the warning in here.
+(! grep -q -e '\[error\]' -e '\[fatal\]' /var/log/fluent/fluentd.log)
 
 # Test: Guard duplicated instance
 (! sudo /usr/sbin/fluentd)
