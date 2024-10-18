@@ -28,7 +28,6 @@ add_system_user() {
 }
 
 v4migration=n
-v4migration_with_restart=n
 
 add_directories() {
     mkdir -p /var/run/<%= package_dir %>
@@ -88,17 +87,6 @@ migration_from_v4_main_process() {
             ln -sf /etc/<%= package_dir %>/<%= compat_service_name %>.conf /etc/<%= package_dir %>/<%= service_name %>.conf
         fi
     fi
-    if [ -h /etc/systemd/system/td-agent.service ]; then
-        if [ -n "$(command -v systemctl)" ]; then
-            if systemctl is-active <%= compat_service_name %> >/dev/null; then
-                # Want to restart with new user/group here,
-                # but to avoid holding file descriptor under /var/log/<%= compat_package_dir %>/,
-                # delay restarting <%= service_name %> service.
-                systemctl stop <%= compat_service_name %>
-                v4migration_with_restart=y
-           fi
-        fi
-    fi
     if [ -d /var/log/<%= compat_package_dir %> -a ! -h /var/log/<%= compat_package_dir %> ]; then
         # /var/log/<%= compat_package_dir %> migration from v4
         if [ -d /var/log/<%= compat_package_dir %>/buffer ]; then
@@ -137,11 +125,55 @@ migration_from_v4_post_process() {
         rm -fr /var/log/<%= compat_package_dir %>
         ln -sf /var/log/<%= package_dir %> /var/log/<%= compat_package_dir %>
     fi
-    if [ "$v4migration_with_restart" = "y" ]; then
-        if [ -n "$(command -v systemctl)" ]; then
-            systemctl daemon-reload
-            systemctl restart <%= service_name %>
-        fi
+}
+
+local_plugin_migration=/tmp/<%= package_dir %>/.local_plugin_migration
+local_base_plugins=/tmp/<%= package_dir %>/.local_base_plugins
+local_missing_plugins=/tmp/<%= package_dir %>/.local_missing_plugins
+install_missing_plugins() {
+    if [ -f $local_plugin_migration ]; then
+        echo "Checking network connectivity..."
+	if ! curl --fail --silent -O https://rubygems.org/specs.4.8.gz; then
+	    echo "Can't install missing plugins automatically, please install the following plugins manually."
+	    cat $local_plugin_migration
+	else
+	    echo "Install missing plugins automatically..."
+	    /usr/sbin/fluent-gem list | grep fluent-plugin | cut -d' ' -f1 > $local_base_plugins
+	    # NOTE: Do not install already bundled plugins
+	    diff -u $local_base_plugins $local_plugin_migration | grep '^+fluent' | sed -e 's/\+//' > $local_missing_plugins
+	    if [ -s $local_missing_plugins ]; then
+		cat $local_missing_plugins | xargs sudo /usr/sbin/fluent-gem install --no-document
+	    else
+		echo "No need to install missing plugins..."
+	    fi
+	    rm -f $local_base_plugins
+	    rm -f $local_missing_plugins
+	fi
+	rm -f $local_plugin_migration
+    fi
+}
+
+fluentd_auto_restart() {
+    if [ -d /run/systemd/system ]; then
+	pid=$(systemctl show <%= service_name %> --property=MainPID --value)
+	if [ $pid -ne 0 ]; then
+	    env_vars=$(sudo sed -e 's/\x0/\n/g' /proc/$pid/environ)
+	    action=$(eval $env_vars && echo $FLUENT_PACKAGE_SERVICE_RESTART)
+	    case "$action" in
+		auto)
+		    if [ "$1" = "upgrade" ]; then
+			echo "Kick auto service upgrade mode to MainPID:$pid"
+			kill -USR2 $pid
+		    fi
+		    ;;
+		manual)
+		    echo "No need to restart service in manual mode..."
+		    ;;
+		*)
+		    echo "Nothing to be done..."
+		    ;;
+	    esac
+	fi
     fi
 }
 
@@ -152,6 +184,8 @@ case "$1" in
         migration_from_v4_main_process
         fixperms
         migration_from_v4_post_process
+        install_missing_plugins
+        fluentd_auto_restart
 	;;
     abort-upgrade|abort-deconfigure|abort-remove)
         :
@@ -169,3 +203,13 @@ fi
 <% end %>
 
 #DEBHELPER#
+
+. /etc/default/<%= service_name %>
+echo "FLUENT_PACKAGE_SERVICE_RESTART: $FLUENT_PACKAGE_SERVICE_RESTART"
+case "$FLUENT_PACKAGE_SERVICE_RESTART" in
+    auto|manual)
+	echo "FLUENT_PACKAGE_SERVICE_RESTART: $FLUENT_PACKAGE_SERVICE_RESTART"
+	;;
+    *)
+	;;
+esac

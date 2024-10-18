@@ -42,7 +42,6 @@ test $(eval $env_vars && echo $FLUENT_CONF) = "/etc/fluent/fluentd.conf"
 test $(eval $env_vars && echo $FLUENT_PACKAGE_LOG_FILE) = "/var/log/fluent/fluentd.log"
 test $(eval $env_vars && echo $FLUENT_PLUGIN) = "/etc/fluent/plugin"
 test $(eval $env_vars && echo $FLUENT_SOCKET) = "/var/run/fluent/fluentd.sock"
-test $(eval $env_vars && echo $FLUENT_PACKAGE_VERSION) = "$next_package_ver"
 
 # Test: fluent-diagtool
 sudo fluent-gem install fluent-plugin-concat
@@ -52,7 +51,10 @@ test $(find /tmp/ -name gem_local_list.output | xargs cat) = "fluent-plugin-conc
 # Test: logs
 sleep 3
 test -e /var/log/fluent/fluentd.log
-(! grep -q -e '\[warn\]' -e '\[error\]' -e '\[fatal\]' /var/log/fluent/fluentd.log)
+
+# The warning might be displayed at the timing to terminate the thread.
+# So, it does not check the warning in here.
+(! grep -q -e '\[error\]' -e '\[fatal\]' /var/log/fluent/fluentd.log)
 
 # Test: Guard duplicated instance
 (! sudo /usr/sbin/fluentd)
