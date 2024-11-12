@@ -2,13 +2,41 @@
 
 set -exu
 
-. $(dirname $0)/commonvar.sh
+. $(dirname $0)/../commonvar.sh
 
-sudo $DNF install -y rsyslog
+v5_package="/host/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb"
+v6_package="/host/v6-test/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb"
+
+case "$1" in
+    v5)
+        package=$v5_package
+        ;;
+    v6)
+        package=$v6_package
+        ;;
+    *)
+        echo "Invalid argument: $1"
+        exit 1
+        ;;
+esac
+
+case "$2" in
+    v5)
+        next_package=$v5_package
+        ;;
+    v6)
+        next_package=$v6_package
+        ;;
+    *)
+        echo "Invalid argument: $2"
+        exit 1
+        ;;
+esac
+
+sudo apt install -V -y rsyslog
 
 # Install the current
-package="/host/${distribution}/${DISTRIBUTION_VERSION}/x86_64/Packages/fluent-package-[0-9]*.rpm"
-sudo $DNF install -y $package
+sudo apt install -V -y $package
 
 # Set up configuration
 cat < $(dirname $0)/../../test-tools/rsyslog.conf >> /etc/rsyslog.conf
@@ -18,8 +46,8 @@ cp $(dirname $0)/../../test-tools/fluentd.conf /etc/fluent/fluentd.conf
 sudo systemctl restart rsyslog
 
 # Launch fluentd
-sudo systemctl enable --now fluentd
-main_pid=$(eval $(systemctl show fluentd --property=MainPID) && echo $MainPID)
+sudo systemctl restart fluentd
+main_pid=$(systemctl show --value --property=MainPID fluentd)
 
 # Ensure to wait for fluentd launching
 sleep 1
@@ -30,10 +58,9 @@ sleep 1
 
 sleep 1
 
-# Update to the next major version
-next_package="/host/v6-test/${distribution}/${DISTRIBUTION_VERSION}/x86_64/Packages/fluent-package-*.rpm"
-sudo $DNF install -y $next_package
-test $main_pid -eq $(eval $(systemctl show fluentd --property=MainPID) && echo $MainPID)
+# Update to the next version
+sudo apt install -V -y --allow-downgrades $next_package
+test $main_pid -eq $(systemctl show --value --property=MainPID fluentd)
 
 # Main process should be replaced by USR2 signal
 sleep 20
