@@ -58,8 +58,13 @@ sleep 1
 
 sleep 1
 
+command="install"
+if [ "$2" = "v5" ]; then
+    command="downgrade"
+fi
+
 # Update to the next version
-sudo $DNF install -y $next_package
+sudo $DNF $command -y $next_package
 test $main_pid -eq $(eval $(systemctl show fluentd --property=MainPID) && echo $MainPID)
 
 # Main process should be replaced by USR2 signal
