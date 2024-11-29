@@ -16,7 +16,7 @@ jobs:
         run: |
           cd fluent-package
           gem install bundler:2.3.27
-          bundle update
+          bundle update -j 4
       - uses: peter-evans/create-pull-request@v5
         with:
           commit-message: Update Gemfile.lock
