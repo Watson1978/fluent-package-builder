@@ -1,0 +1,24 @@
+name: Windows
+
+on:
+  workflow_dispatch
+
+jobs:
+  bundle-update:
+    name: Bundle Update
+    runs-on: windows-latest
+    steps:
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3
+      - uses: actions/checkout@v4
+      - name: Bundle Update
+        run: |
+          bundle update
+      - uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: Update Gemfile.lock
+          delete-branch: true
+          signoff: true
+          title: Update Gemfile.lock
