@@ -20,7 +20,7 @@ jobs:
       - name: Git commit
         run: |
           $today = Get-Date -format "yyyyMMdd"
-          git branch "bundle-update/$today"
+          git branch "bundle-update/${today}"
           git add fluent-package/Gemfile.lock
           git commit -m "Update Gemfile.lock"
           git rebase HEAD~1 --signoff
