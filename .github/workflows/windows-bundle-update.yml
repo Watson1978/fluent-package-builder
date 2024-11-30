@@ -17,13 +17,6 @@ jobs:
           cd fluent-package
           gem install bundler:2.3.27
           bundle _2.3.27_ update -j 4
-      - name: Git commit
-        run: |
-          $today = Get-Date -format "yyyyMMdd"
-          git branch "bundle-update/${today}"
-          git add fluent-package/Gemfile.lock
-          git commit -m "Update Gemfile.lock"
-          git rebase HEAD~1 --signoff
       - name: Create Pull Request
         run: |
-          gh create pr --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+          gh create pr  --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
