@@ -23,13 +23,11 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-      - name: git commit
+      - name: Create Pull Request
         run: |
           $today = Get-Date -format "yyyyMMdd"
           git branch "bundle-update/${today}"
           git add fluent-package/Gemfile.lock
           git commit -m "Update Gemfile.lock"
           git rebase HEAD~1 --signoff
-      - name: Create Pull Request
-        run: |
           gh pr create --head --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
