@@ -30,4 +30,4 @@ jobs:
           git add fluent-package/Gemfile.lock
           git commit -m "Update Gemfile.lock"
           git rebase HEAD~1 --signoff
-          gh pr create --head --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+          gh pr create --head "bundle-update/${today}" --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
