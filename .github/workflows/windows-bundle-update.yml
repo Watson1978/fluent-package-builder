@@ -21,8 +21,8 @@ jobs:
           bundle _2.3.27_ update -j 4
       - name: git config
         run: |
-          git config user.name ${{ github.event.pusher.name }}
-          git config user.email ${{ github.event.pusher.email }}
+          git config user.name github-actions
+          git config user.email github-actions@github.com
       - name: git commit
         run: |
           $today = Get-Date -format "yyyyMMdd"
