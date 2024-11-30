@@ -32,4 +32,4 @@ jobs:
           git rebase HEAD~1 --signoff
       - name: Create Pull Request
         run: |
-          gh create pr --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
+          gh pr create --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
