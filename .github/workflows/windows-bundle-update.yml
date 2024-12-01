@@ -26,6 +26,7 @@ jobs:
       - name: git commit
         run: |
           git branch bundle-update
+          git switch bundle-update
           git add fluent-package/Gemfile.lock
           git commit --message "Update Gemfile.lock" --signoff
           git push --set-upstream origin bundle-update
