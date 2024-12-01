@@ -28,7 +28,6 @@ jobs:
           git branch bundle-update
           git add fluent-package/Gemfile.lock
           git commit -m "Update Gemfile.lock"
-          git rebase HEAD~1 --signoff
           git push --force-with-lease origin bundle-update
       - name: Create Pull Request
         run: |       
