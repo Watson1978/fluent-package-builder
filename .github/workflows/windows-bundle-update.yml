@@ -28,7 +28,7 @@ jobs:
           git branch bundle-update
           git add fluent-package/Gemfile.lock
           git commit --message "Update Gemfile.lock" --signoff
-          git push --force-with-lease origin bundle-update
+          git push --set-upstream origin bundle-update
           # gh pr create --base master --head bundle-update --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
           gh pr create --fill
       # - name: Create Pull Request
