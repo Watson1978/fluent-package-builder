@@ -25,10 +25,11 @@ jobs:
           git config user.email github-actions@github.com
       - name: git commit & push
         run: |
+          git branch -d bundle-update
           git branch bundle-update
           git add fluent-package/Gemfile.lock
           git commit --message "Update Gemfile.lock" --signoff
-          git push --force-with-lease origin bundle-update
+          # git push --force-with-lease origin bundle-update
       - name: Create Pull Request
         run: |       
           gh pr create --base master --head bundle-update --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow\nRef: ${{ github.event.repository.url }}/actions/runs/${{ github.run_id }}"
