@@ -3,6 +3,9 @@ name: Maintenance - Bundle Update
 on:
   workflow_dispatch
 
+permissions:
+  pull-requests: write
+
 jobs:
   bundle-update:
     runs-on: windows-latest
