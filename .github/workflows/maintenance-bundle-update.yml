@@ -29,6 +29,6 @@ jobs:
           git switch --create $branch
           git add fluent-package/Gemfile.lock
           git commit --message "Update Gemfile.lock" --signoff
-          git push --force-with-lease origin $branch
+          git push origin $branch
           gh pr create --title "Update Gemfile.lock" --body "Automated changes by Bundle Update workflow"
   
