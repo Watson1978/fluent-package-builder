@@ -9,6 +9,7 @@ sudo apt install -y curl ca-certificates
 curl -fsSL https://toolbelt.treasuredata.com/sh/install-${distribution}-${code_name}-td-agent4.sh | sh
 
 systemctl status --no-pager td-agent
+main_pid=$(eval $(systemctl show td-agent --property=MainPID) && echo $MainPID)
 
 # Generate garbage files
 touch /etc/td-agent/a\ b\ c
@@ -56,6 +57,9 @@ sudo systemctl enable --now fluentd
 
 systemctl status --no-pager td-agent
 systemctl status --no-pager fluentd
+
+# Fluentd should be restarted when update from v4.
+test $main_pid -ne $(eval $(systemctl show fluentd --property=MainPID) && echo $MainPID)
 
 # Test: config migration
 test -h /etc/td-agent
