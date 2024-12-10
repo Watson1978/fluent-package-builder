@@ -772,10 +772,10 @@ class BuildTask
       # Currently, macOS only.
       sh("perl", "./Configure", *(configure_opts + arch_opts))
       sh("make", "depend")
-      sh("make")
+      sh("make", "-j#{Etc.nprocessors}" )
       # For building rdkafka gem. The built openssl library for built Ruby cannot use without install.
-      sh("make", "install")
-      sh("make", "install", "DESTDIR=#{STAGING_DIR}")
+      sh("make", "install", "-j#{Etc.nprocessors}")
+      sh("make", "install", "-j#{Etc.nprocessors}", "DESTDIR=#{STAGING_DIR}")
     end
     puts "::endgroup::" if ENV["CI"]
   end
@@ -806,7 +806,7 @@ class BuildTask
       sh("make", "install", "-j#{Etc.nprocessors}", "DESTDIR=#{STAGING_DIR}")
 
       # For building gems. The built ruby & gem command cannot use without install.
-      sh("make", "install")
+      sh("make", "install", "-j#{Etc.nprocessors}")
     end
     puts "::endgroup::" if ENV["CI"]
   end
