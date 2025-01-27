@@ -235,7 +235,31 @@
                   Return="check"
                   Impersonate="no" />
 
+    <Property Id="BackupRegistryKey" Value=" "/>
+    <CustomAction Id="SetBackupRegistryKeyCommand"
+                  Property="BackupRegistryKey"
+                  Value="&quot;cmd&quot; /c &quot;chcp 437 &amp;&amp; reg export HKLM\SYSTEM\CurrentControlSet\Services\fluentdwinsvc C:/fluentdwinsvc.reg&quot;"/>
+    <CustomAction Id="BackupRegistryKey"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+    <Property Id="RestoreRegistryKey" Value=" "/>
+    <CustomAction Id="SetRestoreRegistryKeyCommand"
+                  Property="RestoreRegistryKey"
+                  Value="&quot;cmd&quot; /c &quot;reg import C:/fluentdwinsvc.reg&quot;"/>
+    <CustomAction Id="RestoreRegistryKey"
+                  BinaryKey="WixCA"
+                  DllEntry="WixQuietExec64"
+                  Execute="deferred"
+                  Return="ignore"
+                  Impersonate="no" />
+
     <InstallExecuteSequence>
+      <Custom Action="SetBackupRegistryKeyCommand" Before="BackupRegistryKey">REMOVE="ALL"</Custom>
+      <Custom Action="BackupRegistryKey" Before="StopServices">REMOVE="ALL"</Custom>
+
       <Custom Action="SetPostInstallCommand" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="PostInstall" After="SetPostInstallCommand">NOT Installed</Custom>
 
@@ -244,6 +268,9 @@
 
       <Custom Action="SetInstallFluentdWinSvcCommand" After="InstallFiles">NOT Installed</Custom>
       <Custom Action="InstallFluentdWinSvc" After="SetInstallFluentdWinSvcCommand">NOT Installed</Custom>
+
+      <Custom Action="SetRestoreRegistryKeyCommand" After="InstallFluentdWinSvc">NOT Installed</Custom>
+      <Custom Action="RestoreRegistryKey" After="SetRestoreRegistryKeyCommand">NOT Installed</Custom>
 
       <Custom Action="SetCreateCompatTdAgentBat" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="CreateCompatTdAgentBat" After="SetCreateCompatTdAgentBat">NOT Installed</Custom>
