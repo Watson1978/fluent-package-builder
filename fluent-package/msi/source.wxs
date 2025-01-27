@@ -102,6 +102,10 @@
                         Stop="uninstall"
                         Remove="uninstall" />
       </Component>
+      <Component Id="FluentRegistry" Guid="cef03900-4c2e-410a-a904-f6830ea9777f" Permanent="yes">
+        <RegistryKey Root="HKLM" Key="System\CurrentControlSet\Services\fluentdwinsvcp">
+        </RegistryKey>
+      </Component>
     </DirectoryRef>
 
     <SetDirectory Id="WINDOWSVOLUME" Value="[WindowsVolume]" />
@@ -136,6 +140,7 @@
       <ComponentRef Id="FluentConf" />
       <ComponentRef Id="FluentAcl" />
       <ComponentRef Id="FluentdBat" />
+      <ComponentRef Id="FluentRegistry" />
     </Feature>
 
     <!-- UI Stuff -->
