@@ -33,11 +33,28 @@ jobs:
           gem install serverspec
           gem install bundler:2.2.9 --no-document
           rake msi:build
+      - uses: actions/checkout@v4
+        if: ${{ ! steps.cache-msi.outputs.cache-hit }}
+        with:
+          path: v6-test
+      - name: Build v6 msi with Docker
+        if: ${{ ! steps.cache-msi.outputs.cache-hit }}
+        run: |
+          cd v6-test
+          git config user.email "fluentd@googlegroups.com"
+          git config user.name "Fluentd developers"
+          git am fluent-package/bump-version-v6.patch
+          rake msi:build
       - name: Upload td-agent msi
         uses: actions/upload-artifact@master
         with:
           name: packages-windows-x86_64
           path: fluent-package/msi/repositories
+      - name: Upload v6 fluent-package msi
+        uses: actions/upload-artifact@master
+        with:
+          name: v6-packages-windows-x86_64
+          path: v6-test/fluent-package/msi/repositories
   check_package_size:
     name: Check Package Size
     needs: build
