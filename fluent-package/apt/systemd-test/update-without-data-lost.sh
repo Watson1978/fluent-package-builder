@@ -5,7 +5,7 @@ set -exu
 . $(dirname $0)/../commonvar.sh
 
 v5_package="/host/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb"
-v6_package="/host/v6-test/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb"
+v6_package="/host/v7-test/${distribution}/pool/${code_name}/${channel}/*/*/fluent-package_*_${architecture}.deb"
 
 case "$1" in
     v5)

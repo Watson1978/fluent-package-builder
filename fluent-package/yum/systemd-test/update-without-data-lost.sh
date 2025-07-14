@@ -5,7 +5,7 @@ set -exu
 . $(dirname $0)/commonvar.sh
 
 v5_package="/host/${distribution}/${DISTRIBUTION_VERSION}/x86_64/Packages/fluent-package-*.rpm"
-v6_package="/host/v6-test/${distribution}/${DISTRIBUTION_VERSION}/x86_64/Packages/fluent-package-*.rpm"
+v6_package="/host/v7-test/${distribution}/${DISTRIBUTION_VERSION}/x86_64/Packages/fluent-package-*.rpm"
 
 case "$1" in
     v5)
