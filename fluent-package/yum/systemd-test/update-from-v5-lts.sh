@@ -32,6 +32,7 @@ sudo $DNF install -y \
     /host/${distribution}/${DISTRIBUTION_VERSION}/x86_64/Packages/fluent-package-[0-9]*.rpm
 
 cat /var/log/fluent/fluentd.log
+sleep 10
 
 # Test: take over enabled state
 systemctl is-enabled fluentd
