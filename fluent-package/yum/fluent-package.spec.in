@@ -435,6 +435,7 @@ fi
 %attr(0755,fluentd,fluentd) %dir %{_localstatedir}/log/@PACKAGE_DIR@/buffer
 %attr(0755,fluentd,fluentd) %dir %{_sysconfdir}/@PACKAGE_DIR@
 %attr(0755,fluentd,fluentd) %dir %{_sysconfdir}/@PACKAGE_DIR@/plugin
+%attr(0755,fluentd,fluentd) %dir %{_sysconfdir}/@PACKAGE_DIR@/conf.d
 # NOTE: %{_tmpfilesdir} is available since CentOS 7
 %attr(0755,fluentd,fluentd) %dir /tmp/@PACKAGE_DIR@
 %changelog
