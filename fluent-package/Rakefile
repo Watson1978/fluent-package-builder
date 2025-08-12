@@ -1190,7 +1190,12 @@ class BuildTask
         end
       end
     end
+    configs.concat([
+      "etc/#{PACKAGE_DIR}/conf.d/obsolete_plugins.conf",
+    ])
     configs.each do |config|
+      p "!" * 80
+      p config
       src =
         if config == fluentd_conf_default
           template_path(fluentd_conf)
