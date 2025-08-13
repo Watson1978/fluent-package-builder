@@ -70,6 +70,9 @@ test $main_pid -ne $(eval $(systemctl show fluentd --property=MainPID) && echo $
 
 # Stop fluentd to flush the logs and check
 sudo systemctl stop fluentd
+cat /var/log/fluent/test_udp*.log
+cat /var/log/fluent/test_tcp*.log
+cat /var/log/fluent/test_syslog*.log
 test $(wc -l /var/log/fluent/test_udp*.log | tail -n 1 | awk '{print $1}') = "50"
 test $(wc -l /var/log/fluent/test_tcp*.log | tail -n 1 | awk '{print $1}') = "60"
 test $(grep "test-syslog" /var/log/fluent/test_syslog*.log | wc -l) = "70"
