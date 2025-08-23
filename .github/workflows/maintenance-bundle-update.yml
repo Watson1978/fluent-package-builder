@@ -12,12 +12,15 @@ jobs:
     runs-on: windows-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CFLAGS: '-Wno-error=sign-conversion -Wno-error=pointer-to-int-cast' # Compiler flag to avoid build error in libiconv
     steps:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.4 # Use same Ruby version with fluent-package bundled
+      - name: Install libiconv
+        run: |
+          pacman -S libiconv --noconfirm
+          bundle config build.nokogiri --with-iconv-lib="$(pkg-config --libs iconv)" --with-iconv-include="$(pkg-config --variable=includedir iconv)"
       - uses: actions/checkout@v4
       - name: Bundle Update
         run: |
