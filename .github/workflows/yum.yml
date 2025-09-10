@@ -5,6 +5,7 @@ on:
       - master
       - fluent-package-lts-v5
   pull_request:
+  workflow_dispatch:
 jobs:
   build:
     name: Build
