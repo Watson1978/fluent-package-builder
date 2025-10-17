@@ -30,6 +30,7 @@ require 'yaml'
 require 'bundler'
 require 'logger'
 require 'find'
+require 'parallel'
 
 DOWNLOADS_DIR  = File.expand_path("downloads")
 STAGING_DIR    = File.expand_path(ENV["FLUENT_PACKAGE_STAGING_PATH"]   || "staging")
@@ -823,7 +824,11 @@ class BuildTask
          "x",    # Extract files with full paths
          "-y",   # Assume yes on all queries
          path)
-      cp_r(Dir.glob(File.join(src_dir, "*")), ".")
+      source_files = Dir.glob(File.join(src_dir, "**/?*"))
+      Parallel.each(source_files, in_threads: Etc.nprocessors) do |source_file|
+        next if File.directory?(source_file)
+        cp_r(source_file, ".")
+      end
       rm_rf(src_dir)
     end
   end

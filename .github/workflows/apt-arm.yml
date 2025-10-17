@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         if: ${{ ! steps.cache-deb.outputs.cache-hit }}
         run: |
-          gem install serverspec --no-document
+          gem install serverspec parallel --no-document
       - name: Build deb with Docker
         if: ${{ ! steps.cache-deb.outputs.cache-hit }}
         run: |

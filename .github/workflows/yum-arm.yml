@@ -43,7 +43,7 @@ jobs:
       - name: Install dependencies
         if: ${{ ! steps.cache-rpm.outputs.cache-hit }}
         run: |
-          gem install serverspec --no-document
+          gem install serverspec parallel --no-document
       - name: Build rpm with Docker
         if: ${{ ! steps.cache-rpm.outputs.cache-hit }}
         run: |

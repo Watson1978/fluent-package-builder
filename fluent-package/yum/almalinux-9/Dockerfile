@@ -55,6 +55,6 @@ RUN \
     # raise IPv4 priority
     echo "precedence ::ffff:0:0/96 100" > /etc/gai.conf && \
     # enable multiplatform feature
-    gem install --no-document --install-dir /usr/share/gems bundler builder && \
+    gem install --no-document --install-dir /usr/share/gems bundler builder parallel && \
   yum clean ${quiet} all && \
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
