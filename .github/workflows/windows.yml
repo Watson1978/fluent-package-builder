@@ -30,7 +30,7 @@ jobs:
       - name: Build
         if: ${{ ! steps.cache-msi.outputs.cache-hit }}
         run: |
-          gem install serverspec parallel --no-document
+          gem install serverspec
           gem install bundler:2.2.9 --no-document
           rake msi:build
       - name: Upload td-agent msi
