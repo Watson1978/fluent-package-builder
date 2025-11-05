@@ -492,6 +492,9 @@ class BuildTask
       desc "Install all components"
       task :all => [:licenses] do
         remove_needless_files
+
+        puts "******* [DEBUG] glibc version check *******"
+        sh "ldd --version"
       end
 
       debian_pkg_scripts = ["preinst", "postinst", "prerm", "postrm"]
