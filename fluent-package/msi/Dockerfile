@@ -35,4 +35,4 @@ RUN \
   choco install ruby -y --version=3.4.4.2 && \
   refreshenv && \
   ridk install 3 && \
-  gem install --no-document --force bundler builder
+  gem install --no-document --force builder
