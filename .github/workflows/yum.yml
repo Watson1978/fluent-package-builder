@@ -255,7 +255,7 @@ jobs:
 
   v2test:
     name: Test ${{ matrix.label }} ${{ matrix.test }} (CGroup V2)
-    needs: [define-matrix, check_package_size, installation_test, serverspec_test, confluent_test, binstubs_test]
+    needs: [define-matrix, check_package_size, installation_test, serverspec_test, binstubs_test]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:

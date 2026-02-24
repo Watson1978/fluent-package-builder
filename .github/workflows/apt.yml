@@ -196,7 +196,7 @@ jobs:
           /fluentd/fluent-package/apt/binstubs-test.sh
   test:
     name: Test ${{ matrix.label }} ${{ matrix.test }}
-    needs: [check_package_size, installation_test, piuparts_test, serverspec_test, confluent_test, binstubs_test]
+    needs: [check_package_size, installation_test, piuparts_test, serverspec_test, binstubs_test]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
