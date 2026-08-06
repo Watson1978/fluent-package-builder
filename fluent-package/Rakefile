@@ -1729,6 +1729,12 @@ SET ARCH=#{arch}
     id = os
     id = "#{id}-#{architecture}" if architecture
     docker_tag = "#{@package}-#{id}"
+    # Building this image takes over 10 minutes, and almost all of it is
+    # chocolatey installing a toolchain that only changes when the Dockerfile
+    # changes. MSI_BUILD_IMAGE lets CI hand us an image that was built and
+    # pushed in advance so that we can skip "docker build" entirely.
+    prebuilt_image = ENV["MSI_BUILD_IMAGE"].to_s.strip
+    docker_tag = prebuilt_image unless prebuilt_image.empty?
     build_command_line = [
       "docker",
       "build",
@@ -1747,7 +1753,7 @@ SET ARCH=#{arch}
 
     write_env
 
-    sh(*build_command_line)
+    sh(*build_command_line) if prebuilt_image.empty?
     sh(*run_command_line)
   end
 

@@ -43,8 +43,38 @@ jobs:
               Start-Sleep -Seconds 10
             }
           }
+      # Building the image from scratch costs more than 10 minutes, most of it
+      # chocolatey installing a toolchain that only changes when the Dockerfile
+      # changes. Reuse the image published by the "Windows build image"
+      # workflow. When it is not available, for example on a pull request that
+      # edits the Dockerfile, leave MSI_BUILD_IMAGE empty so that rake falls
+      # back to building the image locally.
+      - name: Log in to GitHub Container Registry
+        if: ${{ ! steps.cache-msi.outputs.cache-hit && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        shell: pwsh
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $env:TOKEN | docker login ghcr.io --username ${{ github.actor }} --password-stdin
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Pull prebuilt build image
+        id: prebuilt-image
+        if: ${{ ! steps.cache-msi.outputs.cache-hit }}
+        shell: pwsh
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/fluent-package-windows-x64
+          TAG: ${{ hashFiles('fluent-package/msi/Dockerfile') }}
+        run: |
+          docker pull "${env:IMAGE}:${env:TAG}"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "::warning::${env:IMAGE}:${env:TAG} is not available, building the image locally instead"
+            exit 0
+          }
+          "image=${env:IMAGE}:${env:TAG}" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
       - name: Build
         if: ${{ ! steps.cache-msi.outputs.cache-hit }}
+        env:
+          MSI_BUILD_IMAGE: ${{ steps.prebuilt-image.outputs.image }}
         run: |
           gem install serverspec
           gem install bundler:2.2.9 --no-document
