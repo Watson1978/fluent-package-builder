@@ -149,10 +149,7 @@ jobs:
         label:
           - Debian bookworm amd64
         test:
-          - "install-newly.sh local"
-          - "tmpfiles.sh"
-          - "update-from-v5-lts.sh"
-          - "update-to-next-version.sh"
+          - "update-without-data-lost.sh v6 v7"
           - "update-without-data-lost.sh v7 v6"
         include:
           - label: Debian bookworm amd64
