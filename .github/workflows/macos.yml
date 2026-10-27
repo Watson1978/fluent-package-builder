@@ -5,7 +5,6 @@ on:
       - master
       - fluent-package-v5
       - fluent-package-v6
-  pull_request:
   workflow_dispatch:
 concurrency:
   group: ${{ github.head_ref || github.sha }}-${{ github.workflow }}
