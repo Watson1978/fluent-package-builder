@@ -193,19 +193,36 @@ jobs:
           sudo incus list || true
           sudo incus config show target --expanded || true
           sudo incus info target --show-log | tail -40 || true
-          sudo incus exec target -- sh -c '
-            cat /etc/resolv.conf
-            getent hosts deb.debian.org || echo "resolve-failed"
-            grep -E "^Cap(Eff|Bnd)" /proc/self/status
-            echo "self label: $(cat /proc/self/attr/current 2>/dev/null)"
-            for p in $(pgrep -f "bin/fluentd"); do
-              echo "== pid $p uid=$(stat -c %u /proc/$p) label=$(cat /proc/$p/attr/current 2>/dev/null)"
-              grep -E "^(Uid|Gid|CapEff|CapBnd|NSpid)" /proc/$p/status
-              ls -l /proc/$p/ns/user /proc/$p/ns/pid
-              kill -0 $p && echo "kill-0 ok"
-              head -c1 /proc/$p/environ >/dev/null && echo "environ ok"
-            done
-          ' || true
+          cat /sys/kernel/security/lsm; echo
+          cat /proc/sys/kernel/yama/ptrace_scope || true
+          sudo dmesg | grep -iE "landlock|lsm" | tail -20 || true
+          sudo journalctl -k --no-pager | grep -iE "landlock" | tail -20 || true
+          cat > probe.sh <<'EOF'
+          ctx=$1
+          echo "##### probe: $ctx"
+          getent hosts deb.debian.org || echo "resolve-failed"
+          echo "self userns=$(readlink /proc/self/ns/user) pidns=$(readlink /proc/self/ns/pid)"
+          echo "self uid_map: $(tr -s ' ' < /proc/self/uid_map)"
+          grep -E "^(Uid|CapEff|NoNewPrivs|Seccomp|Seccomp_filters)" /proc/self/status
+          echo "self label: $(cat /proc/self/attr/current 2>/dev/null)"
+          cat /proc/self/cgroup
+          check() {
+            p=$1
+            r1=$(kill -0 "$p" 2>&1 && echo ok)
+            r2=$(head -c1 "/proc/$p/environ" 2>&1 >/dev/null && echo ok)
+            r3=$(readlink "/proc/$p/ns/user" 2>&1)
+            echo "pid $p uid=$(stat -c %u /proc/$p) comm=$(cat /proc/$p/comm): kill0=[$r1] environ=[$r2] userns=[$r3]"
+          }
+          check 1
+          for p in $(pgrep -x systemd-journal); do check "$p"; done
+          for p in $(pgrep -f "bin/fluentd"); do check "$p"; done
+          EOF
+          sudo incus exec target -- sh /host/probe.sh incus-exec || true
+          sudo incus exec target -- systemd-run --wait --pipe --quiet sh /host/probe.sh systemd-run || true
+          initpid=$(sudo incus info target | awk '/^PID:/{print $2}')
+          [ -n "$initpid" ] && sudo nsenter -t "$initpid" -a sh /host/probe.sh nsenter || true
+          sudo lsns -t user || true
+          sudo ps -eo pid,ppid,uid,userns,pidns,args --forest | grep -E "fluentd|incus|lxc|forkexec|/sbin/init|systemd$" | grep -v grep | head -80 || true
 
   confluent_test:
     name: Confluent Test
