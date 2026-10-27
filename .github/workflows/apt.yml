@@ -214,6 +214,7 @@ jobs:
           check 1
           for p in $(pgrep -x systemd-journal); do check "$p"; done
           for p in $(pgrep -f "bin/fluentd"); do check "$p"; done
+          for p in $(pgrep -x rsyslogd); do check "$p"; echo "  label: $(cat /proc/$p/attr/current 2>&1)"; done
           EOF
           sudo incus exec target -- sh /host/probe.sh incus-exec || true
           sudo incus exec target -- systemd-run --wait --pipe --quiet sh /host/probe.sh systemd-run || true
@@ -224,7 +225,7 @@ jobs:
           cat /sys/kernel/security/apparmor/features/ptrace/mask; echo
           sudo ls /var/lib/incus/security/apparmor/profiles/ || true
           sudo sh -c 'grep -nE "signal|ptrace|deny|^profile|change_profile|stack" /var/lib/incus/security/apparmor/profiles/incus-target*' || true
-          for p in $(pgrep -f "/sbin/init|bin/fluentd|systemd-journald"); do
+          for p in $(pgrep -f "/sbin/init|bin/fluentd|systemd-journald|rsyslogd"); do
             echo "host pid $p: $(sudo cat /proc/$p/attr/current 2>&1) :: $(tr '\0' ' ' < /proc/$p/cmdline | cut -c1-80)"
           done
           sudo incus exec target -- sleep 15 &

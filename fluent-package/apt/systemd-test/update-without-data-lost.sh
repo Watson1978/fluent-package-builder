@@ -45,6 +45,18 @@ cp $(dirname $0)/../../test-tools/fluentd.conf /etc/fluent/fluentd.conf
 
 # Launch rsyslog
 sudo systemctl restart rsyslog
+(
+  set +e +x
+  echo "=== apparmor in container"
+  dpkg -l apparmor 2>/dev/null | tail -1
+  ls /etc/apparmor.d/ 2>/dev/null | tr '\n' ' '; echo
+  echo "--- loaded profiles"
+  cat /sys/kernel/security/apparmor/profiles 2>&1 | head -40
+  echo "--- process labels"
+  ps -eo pid,label,args | grep -E 'systemd|rsyslog|fluentd' | grep -v grep
+  echo "--- rsyslog unit"
+  systemctl status rsyslog --no-pager 2>&1 | head -15
+)
 
 # Launch fluentd
 sudo systemctl restart fluentd
