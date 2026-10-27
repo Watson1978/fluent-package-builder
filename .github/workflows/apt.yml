@@ -136,7 +136,7 @@ jobs:
           test-docker-image: ${{ matrix.test-docker-image }}
           test-script: binstubs-test.sh
   test:
-    name: Test ${{ matrix.runner }} apparmor=${{ matrix.apparmor }} ${{ matrix.test }}
+    name: Test ${{ matrix.runner }} ${{ matrix.label }} ${{ matrix.test }}
     needs: [build-next, check_package_size, installation_test, piuparts_test, serverspec_test, binstubs_test]
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
@@ -145,12 +145,12 @@ jobs:
       matrix:
         runner:
           - ubuntu-26.04
-        apparmor:
-          - default
-          - unconfined
+          - ubuntu-24.04
         label:
           - Debian bookworm amd64
         test:
+          - "install-newly.sh local"
+          - "tmpfiles.sh"
           - "update-from-v5-lts.sh"
           - "update-to-next-version.sh"
           - "update-without-data-lost.sh v7 v6"
@@ -158,8 +158,6 @@ jobs:
           - label: Debian bookworm amd64
             rake-job: debian-bookworm
             container-image: images:debian/12
-          - apparmor: unconfined
-            launch-options: "-c raw.lxc=lxc.apparmor.profile=unconfined"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -175,13 +173,12 @@ jobs:
       - name: Setup Incus
         run: ./fluent-package/test-tools/setup-incus.sh
       - name: Run Test  ${{ matrix.test }} on ${{ matrix.container-image }}
-        env:
-          INCUS_LAUNCH_OPTIONS: ${{ matrix.launch-options }}
         run: fluent-package/apt/systemd-test/test.sh ${{ matrix.container-image }} ${{ matrix.test }}
       - name: Collect diagnostics
         if: always()
         run: |
-          set -x
+          set +e -x
+          sudo incus profile show default
           uname -a
           grep PRETTY_NAME /etc/os-release
           incus version || true

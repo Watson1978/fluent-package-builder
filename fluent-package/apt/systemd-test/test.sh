@@ -15,7 +15,7 @@ dir="/host/fluent-package/apt/systemd-test"
 set -eux
 
 echo "::group::Run test: launch $image"
-sudo incus launch $image target --debug ${INCUS_LAUNCH_OPTIONS:-}
+sudo incus launch $image target --debug
 sleep 5
 echo "::endgroup::"
 echo "::group::Run test: configure $image"
